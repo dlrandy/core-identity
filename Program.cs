@@ -1,12 +1,16 @@
 ﻿using IdentityManager.Data;
 using IdentityManager.Models;
+using IdentityManager.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IdentityManager.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//builder.Services.AddControllers()
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.UseSqlServer(
@@ -15,7 +19,23 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddFluentEmail(builder.Configuration);
+builder.Services.AddScoped<IEmailService, EmailService>();
+//builder.Services.AddControllers();
+//builder.Services.AddEndpointsApiExplorer();
+builder.Services.Configure<IdentityOptions>(opt =>
+{
+    //opt.Password.RequireDigit = false;
+    //opt.Password.RequireLowercase = false;
+    //opt.Password.RequireNonAlphanumeric = false;
+    opt.Lockout.MaxFailedAccessAttempts = 2;
+    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(40);
+    opt.SignIn.RequireConfirmedEmail = false;
+
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,6 +57,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+//app.MapControllers();
 
 app.Run();
 
