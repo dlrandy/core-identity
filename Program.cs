@@ -23,6 +23,10 @@ builder.Services.AddIdentity<ApplicationUser,IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddFluentEmail(builder.Configuration);
+builder.Services.ConfigureApplicationCookie(opt => {
+
+    opt.AccessDeniedPath = new PathString("/Account/NoAccess");
+});
 builder.Services.AddScoped<IEmailService, EmailService>();
 //builder.Services.AddControllers();
 //builder.Services.AddEndpointsApiExplorer();

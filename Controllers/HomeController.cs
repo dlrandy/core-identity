@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using IdentityManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using IdentityManager.Constants;
 
 namespace IdentityManager.Controllers;
 
@@ -31,7 +32,7 @@ public class HomeController : Controller
         return View();
     }
 
-    [Authorize]
+    [Authorize(Roles = SD.Admin)]
     public IActionResult Privacy()
     {
         return View();
