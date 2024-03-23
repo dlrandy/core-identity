@@ -5,6 +5,11 @@ namespace IdentityManager.Constants
 	{
         public const string User = "User";
         public const string Admin = "Admin";
+
+        public const string Success = "Success";
+        public const string Error = "Error";
+
+
     }
 }
 
