@@ -21,6 +21,9 @@
     <None Remove="Constants\" />
     <None Remove="Views\User\" />
     <None Remove="Views\Role\" />
+    <None Remove="Views\AccessChecker\" />
+    <None Remove="Authorize\" />
+    <None Remove="Services\IServices\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -34,6 +37,9 @@
     <Folder Include="Constants\" />
     <Folder Include="Views\User\" />
     <Folder Include="Views\Role\" />
+    <Folder Include="Views\AccessChecker\" />
+    <Folder Include="Authorize\" />
+    <Folder Include="Services\IServices\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.16" />

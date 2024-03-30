@@ -23,7 +23,9 @@
                     <th>
                         Roles
                     </th>
-                    <th></th>
+                    <th>
+                        Claims
+                    </th>
                 </tr>
                 @foreach (var item in Model)
                 {
@@ -37,11 +39,19 @@
                         <td>
                             @item.Role
                         </td>
+                        <td>
+                            @item.UserClaim
+                        </td>
                         <td style="width:450px;">
                             <div class="row">
                                 <div class="col-3">
                                     <a asp-action="ManageRole" asp-route-userId="@item.Id" class="btn btn-primary w-100" style="cursor:pointer">
                                         Roles
+                                    </a>
+                                </div>
+                                <div class="col-3">
+                                    <a asp-action="ManageUserClaim" asp-route-userId="@item.Id" class="btn btn-info w-100" style="cursor:pointer">
+                                        Claims
                                     </a>
                                 </div>
                                 <div class="col-3">

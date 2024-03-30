@@ -15,6 +15,10 @@ namespace IdentityManager.Models
 
         [NotMapped]
         public string Role { get; set; }
+
+        [NotMapped]
+        public string UserClaim { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }
 

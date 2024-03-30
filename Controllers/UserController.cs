@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Security.Claims;
 using IdentityManager.Constants;
 using IdentityManager.Data;
 using IdentityManager.Models;
 using IdentityManager.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace IdentityManager.Controllers
 {
@@ -22,7 +24,7 @@ namespace IdentityManager.Controllers
 			_roleManager = roleManager;
 		}
 
-		public IActionResult Index() {
+		public async Task<IActionResult> Index() {
 
 			var userList = _db.ApplicationUser.ToList();
 			var userRole = _db.UserRoles.ToList();
@@ -36,8 +38,13 @@ namespace IdentityManager.Controllers
 					user.Role = "none";
 				}
 				else {
-					user.Role = roles.FirstOrDefault(r => r.Id == user_role.RoleId).Name;
-				}
+					List<string> user_roles = (List<string>)await _userManager.GetRolesAsync(user);
+                    user.Role = String.Join(",",user_roles);
+
+					var user_claim = _userManager.GetClaimsAsync(user).GetAwaiter().GetResult().Select(t=>t.Type);
+					user.UserClaim = String.Join(",",user_claim);
+
+                }
 			}
 
 			return View(userList);
@@ -106,7 +113,7 @@ namespace IdentityManager.Controllers
         public async Task<IActionResult> LockUnlock(string userId)
         {
 			//ApplicationUser user = await _userManager.FindByIdAsync(userId);
-            ApplicationUser user = _db.ApplicationUser.FirstOrDefault(u => u.Id == userId); // more safe
+            ApplicationUser user = await _db.ApplicationUser.FirstOrDefaultAsync(u => u.Id == userId); // more safe
             if (user == null)
             {
                 return NotFound();
@@ -133,7 +140,7 @@ namespace IdentityManager.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteUser(string userId)
 		{
-			var user = _db.ApplicationUser.FirstOrDefault(u => u.Id == userId);
+			var user = await _db.ApplicationUser.FirstOrDefaultAsync(u => u.Id == userId);
 			if (user == null)
 			{
 				return NotFound();
@@ -144,6 +151,67 @@ namespace IdentityManager.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+
+        public async Task<IActionResult> ManageUserClaim(string userId)
+        {
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var exsitingUserClaims = await _userManager.GetClaimsAsync(user);
+            var model = new ClaimsViewModel()
+            {
+                User = user
+            };
+
+            foreach (Claim claim in ClaimStore.claimsList)
+            {
+                ClaimSelection userClaim = new()
+                {
+                    ClaimType = claim.Type
+                };
+                if (exsitingUserClaims.Any(c => c.Type == claim.Type))
+                {
+                    userClaim.IsSelected = true;
+                }
+                model.ClaimList.Add(userClaim);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageUserClaim(ClaimsViewModel claimsViewModel)
+        {
+            ApplicationUser user = await _userManager.FindByIdAsync(claimsViewModel.User.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var oldClaims = await _userManager.GetClaimsAsync(user);
+            var result = await _userManager.RemoveClaimsAsync(user, oldClaims);
+
+            if (!result.Succeeded)
+            {
+                TempData[SD.Error] = "Error while removing claims";
+                return View(claimsViewModel);
+            }
+
+            result = await _userManager.AddClaimsAsync(user,
+                claimsViewModel.ClaimList.Where(x => x.IsSelected).Select(y => new Claim(y.ClaimType, y.IsSelected.ToString())));
+
+            if (!result.Succeeded)
+            {
+                TempData[SD.Error] = "Error while adding claims";
+                return View(claimsViewModel);
+            }
+
+            TempData[SD.Success] = "Claims assigned successfully";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
 

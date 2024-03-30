@@ -221,15 +221,16 @@ namespace IdentityManager.Controllers
                 var user = new ApplicationUser() {
                     UserName = model.Email,
                     Email = model.Email,
-                    Name = model.Name
+                    Name = model.Name,
+                    DateCreated = DateTime.Now
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password); 
                 if (result.Succeeded)
                 {
-                    if (model.RoleSelected != null && model.RoleSelected.Length > 0 && model.RoleSelected == SD.Admin)
+                    if (model.RoleSelected != null)
                     {
-                        await _userManager.AddToRoleAsync(user, SD.Admin);
+                        await _userManager.AddToRoleAsync(user, model.RoleSelected);
                     }
                     else {
                         await _userManager.AddToRoleAsync(user, SD.User);
@@ -288,6 +289,14 @@ namespace IdentityManager.Controllers
                     lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
+                    var user = await _userManager.GetUserAsync(User);
+                    var claim = await _userManager.GetClaimsAsync(user);
+
+                    if (claim.Count > 0)
+                    {
+                        await _userManager.RemoveClaimAsync(user, claim.FirstOrDefault(u => u.Type == SD.FirstName));
+                    }
+                    await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(SD.FirstName, user.Name));
                     //return RedirectToAction("Index", "Home");
                     return LocalRedirect(returnurl);
                 }
