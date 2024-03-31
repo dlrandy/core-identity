@@ -71,6 +71,22 @@ builder.Services.AddAuthorization(opts =>
     opts.AddPolicy(SD.AdminWithMoreThan1000Days, p => p.Requirements.Add(new AdminWithMoreThan1000DaysRequirement(1000)));
     opts.AddPolicy(SD.FirstNameAuth, p => p.Requirements.Add(new FirstNameAuthRequirement("test")));
 });
+
+// client value  3vy8Q~BAiTvB5q0zftCQthn.wOsP4ahL_LsEwcdG
+// client  secret id  1bc83d78-11a7-4870-ac60-e196fd1317e9
+// app id  be9cfba6-7481-4896-b56d-5b8dc4bc2302
+
+
+builder.Services.AddAuthentication().AddMicrosoftAccount(opts => {
+
+    opts.ClientId = "be9cfba6-7481-4896-b56d-5b8dc4bc2302";
+    opts.ClientSecret = "3vy8Q~BAiTvB5q0zftCQthn.wOsP4ahL_LsEwcdG";
+});
+builder.Services.AddAuthentication().AddFacebook(opt =>
+{
+    opt.ClientId = "703446795330183";
+    opt.ClientSecret = "4ade067b9326bbe9148a3c4f4f08c27e";
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
